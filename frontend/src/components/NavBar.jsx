@@ -1,19 +1,56 @@
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
 export default function Navbar(){
+    const { user, logout, isAuthenticated, isStudent, isClient } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
+
+    const handleDashboard = () => {
+        if (isStudent) {
+            navigate('/student-dashboard');
+        } else if (isClient) {
+            navigate('/client-dashboard');
+        }
+    };
+
     return(
         <nav style={styles.nav}>
             <div style={styles.left}>
-            <div style={styles.LogoCircular}>FT</div>
-            <span style={styles.logoText}>FlexTasks</span>
+            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={styles.logoCircle}>FT</div>
+                <span style={styles.logoText}>FlexTasks</span>
+            </Link>
             </div>
             <ul style={styles.menu}>
-                <li>Home</li>
-                <li>About</li>
-                <li>FAQ</li>
-                <li>Contact</li>
+                <li><Link to="/" style={styles.menuLink}>Home</Link></li>
+                <li><a href="#how-it-works" style={styles.menuLink}>How It Works</a></li>
+                <li><a href="#about" style={styles.menuLink}>About</a></li>
+                <li><a href="#contact" style={styles.menuLink}>Contact</a></li>
             </ul>
             <div style={styles.right}>
-                <button style={styles.login}>Login</button>
-                <button style={styles.signup}>Sign Up</button>
+                {isAuthenticated ? (
+                    <>
+                        <span style={styles.userName}>Hi, {user?.name}</span>
+                        <button onClick={handleDashboard} style={styles.dashboard}>
+                            Dashboard
+                        </button>
+                        <button onClick={handleLogout} style={styles.login}>Logout</button>
+                    </>
+                ) : (
+                    <>
+                        <Link to="/login" style={{ textDecoration: 'none' }}>
+                            <button style={styles.login}>Login</button>
+                        </Link>
+                        <Link to="/signup" style={{ textDecoration: 'none' }}>
+                            <button style={styles.signup}>Sign Up</button>
+                        </Link>
+                    </>
+                )}
             </div>
         </nav>
     );
@@ -29,6 +66,7 @@ const styles ={
         position: "sticky",
         top:0,
         zIndex: 100,
+        background: "white",
     },
     left: { 
         display: "flex",
@@ -58,9 +96,27 @@ const styles ={
     fontSize: "16px",
     color: "#444",
     },
+    menuLink: {
+        textDecoration: "none",
+        color: "#444",
+    },
     right: {
         display: "flex", 
-        gap: "12px"
+        gap: "12px",
+        alignItems: "center",
+    },
+    userName: {
+        fontSize: "14px",
+        color: "#666",
+    },
+    dashboard: {
+        background: "#e8f5e9",
+        padding: "8px 16px",
+        borderRadius: "8px",
+        color: "#2e7d32",
+        border: "none",
+        cursor: "pointer",
+        fontWeight: "500",
     },
      login: {
     background: "transparent",

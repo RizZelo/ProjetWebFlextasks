@@ -38,7 +38,7 @@ export default function StudentDashboard() {
   const handleApply = (taskId) => {
     const applications = JSON.parse(localStorage.getItem('flextasks_applications') || '[]');
     const newApplication = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       taskId,
       studentId: user.id,
       studentName: user.name,

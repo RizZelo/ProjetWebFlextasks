@@ -39,8 +39,9 @@ export default function Signup() {
       return;
     }
 
+    // Note: In production, password hashing and authentication should be handled server-side
     const newUser = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name,
       email,
       password,

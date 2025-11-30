@@ -58,7 +58,7 @@ export default function ClientDashboard() {
     }
 
     const newTask = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       title,
       description,
       category,

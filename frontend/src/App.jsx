@@ -1,14 +1,24 @@
-import { useEffect, useState } from "react";
-import NavBar from "./components/NavBar";
-import Hero from "./components/Hero"
-import HowItWorks from "./components/HowItWorks"
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import StudentDashboard from './pages/StudentDashboard';
+import ClientDashboard from './pages/ClientDashboard';
+
 function App() {
   return (
-    <>
-    <NavBar />
-    <Hero/>
-    <HowItWorks/>
-    </>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/student-dashboard" element={<StudentDashboard />} />
+          <Route path="/client-dashboard" element={<ClientDashboard />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

@@ -60,10 +60,15 @@ ratingSchema.index({ task: 1, ratedBy: 1 }, { unique: true });
 // Index for user profile queries
 ratingSchema.index({ ratedUser: 1 });
 
+// Helper function to calculate rating from categories
+const calculateOverallRating = (punctuality, professionalism, quality, communication) => {
+  return (punctuality + professionalism + quality + communication) / 4;
+};
+
 // Calculate overall rating before saving
 ratingSchema.pre('save', function(next) {
   // Calculate average of all category ratings
-  this.rating = (this.punctuality + this.professionalism + this.quality + this.communication) / 4;
+  this.rating = calculateOverallRating(this.punctuality, this.professionalism, this.quality, this.communication);
   next();
 });
 
@@ -78,7 +83,7 @@ ratingSchema.post('save', async function() {
   // Calculate overall average from all categories
   let totalRating = 0;
   ratings.forEach(r => {
-    const categoryAvg = (r.punctuality + r.professionalism + r.quality + r.communication) / 4;
+    const categoryAvg = calculateOverallRating(r.punctuality, r.professionalism, r.quality, r.communication);
     totalRating += categoryAvg;
   });
   const avgRating = totalRating / ratings.length;

@@ -63,7 +63,10 @@ export default function ClientDashboard() {
     e.preventDefault();
     setError('');
 
-    if (!title || !description || !category || !price || !date || !time || !address || !city || !zipCode) {
+    const requiredFields = { title, description, category, price, date, time, address, city, zipCode };
+    const missingFields = Object.keys(requiredFields).filter(key => !requiredFields[key]);
+    
+    if (missingFields.length > 0) {
       setError('Please fill in all required fields');
       return;
     }
@@ -195,6 +198,16 @@ export default function ClientDashboard() {
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  const formatLocation = (location) => {
+    if (typeof location === 'string') {
+      return location;
+    }
+    if (location?.address) {
+      return `${location.address}${location.city ? ', ' + location.city : ''}`;
+    }
+    return 'Location not specified';
   };
 
   return (
@@ -401,7 +414,7 @@ export default function ClientDashboard() {
                     <div style={styles.taskDetails}>
                       <span>💰 ${task.price}</span>
                       {task.duration && <span>⏱️ {task.duration}h</span>}
-                      <span>📍 {task.location?.address || task.location}, {task.location?.city || ''}</span>
+                      <span>📍 {formatLocation(task.location)}</span>
                       <span>📅 {formatDate(task.date)}</span>
                       <span>⏰ {task.time}</span>
                     </div>

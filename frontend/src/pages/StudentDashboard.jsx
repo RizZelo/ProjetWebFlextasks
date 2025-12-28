@@ -85,6 +85,16 @@ export default function StudentDashboard() {
     });
   };
 
+  const formatLocation = (location) => {
+    if (typeof location === 'string') {
+      return location;
+    }
+    if (location?.address) {
+      return `${location.address}${location.city ? ', ' + location.city : ''}`;
+    }
+    return 'Location not specified';
+  };
+
   return (
     <div style={styles.container}>
       <nav style={styles.nav}>
@@ -190,7 +200,7 @@ export default function StudentDashboard() {
                 <h3 style={styles.taskTitle}>{task.title}</h3>
                 <p style={styles.taskDescription}>{task.description}</p>
                 <div style={styles.taskDetails}>
-                  <span>📍 {task.location?.address || task.location}, {task.location?.city || ''}</span>
+                  <span>📍 {formatLocation(task.location)}</span>
                   {task.duration && <span>⏱️ {task.duration}h</span>}
                   <span>📅 {formatDate(task.date)}</span>
                   <span>⏰ {task.time}</span>

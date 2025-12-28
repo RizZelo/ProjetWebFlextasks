@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import UserProfile from '../components/UserProfile';
+import ChatModal from '../components/ChatModal';
+import RatingModal from '../components/RatingModal';
 
 const TASK_CATEGORIES = [
   { id: 'cleaning', name: 'Cleaning', icon: '🧹' },
@@ -19,6 +22,11 @@ export default function ClientDashboard() {
   const [showForm, setShowForm] = useState(false);
   const [myTasks, setMyTasks] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [chatTask, setChatTask] = useState(null);
+  const [chatStudent, setChatStudent] = useState(null);
+  const [ratingTask, setRatingTask] = useState(null);
+  const [ratingStudent, setRatingStudent] = useState(null);
   
   // Form state
   const [title, setTitle] = useState('');
@@ -27,7 +35,10 @@ export default function ClientDashboard() {
   const [price, setPrice] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [location, setLocation] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [zipCode, setZipCode] = useState('');
+  const [duration, setDuration] = useState('');
   const [error, setError] = useState('');
 
   const loadData = useCallback(() => {
@@ -52,8 +63,12 @@ export default function ClientDashboard() {
     e.preventDefault();
     setError('');
 
-    if (!title || !description || !category || !price || !date || !time || !location) {
-      setError('Please fill in all fields');
+    const requiredFields = { title, description, category, price, date, time, address, city, zipCode };
+    const missingFields = Object.keys(requiredFields).filter(key => !requiredFields[key]);
+    
+    if (missingFields.length > 0) {
+      const fieldNames = missingFields.map(f => f.charAt(0).toUpperCase() + f.slice(1)).join(', ');
+      setError(`Please fill in the following required fields: ${fieldNames}`);
       return;
     }
 
@@ -65,7 +80,12 @@ export default function ClientDashboard() {
       price: parseFloat(price),
       date,
       time,
-      location,
+      location: {
+        address,
+        city,
+        zipCode
+      },
+      duration: duration ? parseFloat(duration) : null,
       clientId: user.id,
       clientName: user.name,
       status: 'open',
@@ -83,7 +103,10 @@ export default function ClientDashboard() {
     setPrice('');
     setDate('');
     setTime('');
-    setLocation('');
+    setAddress('');
+    setCity('');
+    setZipCode('');
+    setDuration('');
     setShowForm(false);
     loadData();
   };
@@ -91,6 +114,50 @@ export default function ClientDashboard() {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const handleOpenChat = (task) => {
+    // Find the assigned student
+    const acceptedApp = applications.find(a => a.taskId === task.id && a.status === 'accepted');
+    if (acceptedApp) {
+      const storedUsers = JSON.parse(localStorage.getItem('flextasks_users') || '[]');
+      const student = storedUsers.find(u => u.id === acceptedApp.studentId);
+      if (student) {
+        setChatTask(task);
+        setChatStudent(student);
+      } else {
+        alert('Unable to load student information. Please try again.');
+      }
+    }
+  };
+
+  const handleCompleteTask = (task) => {
+    // Mark task as completed
+    const storedTasks = JSON.parse(localStorage.getItem('flextasks_tasks') || '[]');
+    const updatedTasks = storedTasks.map(t => {
+      if (t.id === task.id) {
+        return { ...t, status: 'completed' };
+      }
+      return t;
+    });
+    localStorage.setItem('flextasks_tasks', JSON.stringify(updatedTasks));
+    loadData();
+
+    // Open rating modal
+    const acceptedApp = applications.find(a => a.taskId === task.id && a.status === 'accepted');
+    if (acceptedApp) {
+      const storedUsers = JSON.parse(localStorage.getItem('flextasks_users') || '[]');
+      const student = storedUsers.find(u => u.id === acceptedApp.studentId);
+      if (student) {
+        setRatingTask(task);
+        setRatingStudent(student);
+      }
+    }
+  };
+
+  const handleRatingSubmit = () => {
+    setRatingTask(null);
+    setRatingStudent(null);
   };
 
   const getApplicationsForTask = (taskId) => {
@@ -134,6 +201,16 @@ export default function ClientDashboard() {
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  const formatLocation = (location) => {
+    if (typeof location === 'string') {
+      return location;
+    }
+    if (location?.address) {
+      return `${location.address}${location.city ? ', ' + location.city : ''}`;
+    }
+    return 'Location not specified';
   };
 
   return (
@@ -225,7 +302,22 @@ export default function ClientDashboard() {
                     />
                   </div>
                   <div style={styles.inputGroup}>
-                    <label style={styles.label}>Date</label>
+                    <label style={styles.label}>Duration (hours)</label>
+                    <input
+                      type="number"
+                      value={duration}
+                      onChange={(e) => setDuration(e.target.value)}
+                      style={styles.input}
+                      placeholder="2"
+                      min="0.5"
+                      step="0.5"
+                    />
+                  </div>
+                </div>
+
+                <div style={styles.row}>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>Date *</label>
                     <input
                       type="date"
                       value={date}
@@ -234,7 +326,7 @@ export default function ClientDashboard() {
                     />
                   </div>
                   <div style={styles.inputGroup}>
-                    <label style={styles.label}>Time</label>
+                    <label style={styles.label}>Time *</label>
                     <input
                       type="time"
                       value={time}
@@ -245,14 +337,37 @@ export default function ClientDashboard() {
                 </div>
 
                 <div style={styles.inputGroup}>
-                  <label style={styles.label}>Location</label>
+                  <label style={styles.label}>Address *</label>
                   <input
                     type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
                     style={styles.input}
-                    placeholder="e.g., 123 Main St, Downtown"
+                    placeholder="e.g., 123 Main Street"
                   />
+                </div>
+
+                <div style={styles.row}>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>City *</label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      style={styles.input}
+                      placeholder="e.g., Boston"
+                    />
+                  </div>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>ZIP Code *</label>
+                    <input
+                      type="text"
+                      value={zipCode}
+                      onChange={(e) => setZipCode(e.target.value)}
+                      style={styles.input}
+                      placeholder="02101"
+                    />
+                  </div>
                 </div>
 
                 <div style={styles.formButtons}>
@@ -301,10 +416,28 @@ export default function ClientDashboard() {
                     <p style={styles.taskDescription}>{task.description}</p>
                     <div style={styles.taskDetails}>
                       <span>💰 ${task.price}</span>
-                      <span>📍 {task.location}</span>
+                      {task.duration && <span>⏱️ {task.duration}h</span>}
+                      <span>📍 {formatLocation(task.location)}</span>
                       <span>📅 {formatDate(task.date)}</span>
                       <span>⏰ {task.time}</span>
                     </div>
+                    
+                    {task.status === 'assigned' && (
+                      <div style={styles.taskActions}>
+                        <button 
+                          onClick={() => handleOpenChat(task)} 
+                          style={styles.chatButton}
+                        >
+                          💬 Chat with Student
+                        </button>
+                        <button 
+                          onClick={() => handleCompleteTask(task)} 
+                          style={styles.completeButton}
+                        >
+                          ✓ Mark as Complete
+                        </button>
+                      </div>
+                    )}
                     
                     {taskApplications.length > 0 && (
                       <div style={styles.applicationsSection}>
@@ -314,7 +447,12 @@ export default function ClientDashboard() {
                         {taskApplications.map(app => (
                           <div key={app.id} style={styles.applicationCard}>
                             <div style={styles.applicationInfo}>
-                              <span style={styles.applicantName}>🎓 {app.studentName}</span>
+                              <span 
+                                style={styles.applicantName}
+                                onClick={() => setSelectedUserId(app.studentId)}
+                              >
+                                🎓 {app.studentName}
+                              </span>
                               <span style={styles.applicationDate}>
                                 Applied {formatDate(app.appliedAt)}
                               </span>
@@ -345,6 +483,41 @@ export default function ClientDashboard() {
           )}
         </section>
       </main>
+
+      {/* User Profile Modal */}
+      {selectedUserId && (
+        <UserProfile 
+          userId={selectedUserId} 
+          onClose={() => setSelectedUserId(null)} 
+        />
+      )}
+
+      {/* Chat Modal */}
+      {chatTask && chatStudent && (
+        <ChatModal 
+          task={chatTask}
+          currentUser={user}
+          otherUser={chatStudent}
+          onClose={() => {
+            setChatTask(null);
+            setChatStudent(null);
+          }}
+        />
+      )}
+
+      {/* Rating Modal */}
+      {ratingTask && ratingStudent && (
+        <RatingModal 
+          task={ratingTask}
+          ratedUser={ratingStudent}
+          ratedBy={user}
+          onSubmit={handleRatingSubmit}
+          onClose={() => {
+            setRatingTask(null);
+            setRatingStudent(null);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -633,6 +806,8 @@ const styles = {
   applicantName: {
     fontWeight: '500',
     color: '#333',
+    cursor: 'pointer',
+    textDecoration: 'underline',
   },
   applicationDate: {
     fontSize: '12px',
@@ -670,5 +845,32 @@ const styles = {
   },
   emptyText: {
     color: '#666',
+  },
+  taskActions: {
+    display: 'flex',
+    gap: '12px',
+    marginBottom: '16px',
+  },
+  chatButton: {
+    flex: 1,
+    background: '#2e7d32',
+    color: 'white',
+    padding: '12px',
+    borderRadius: '8px',
+    border: 'none',
+    cursor: 'pointer',
+    fontWeight: '500',
+    fontSize: '14px',
+  },
+  completeButton: {
+    flex: 1,
+    background: '#1976d2',
+    color: 'white',
+    padding: '12px',
+    borderRadius: '8px',
+    border: 'none',
+    cursor: 'pointer',
+    fontWeight: '500',
+    fontSize: '14px',
   },
 };

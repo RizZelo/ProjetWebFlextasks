@@ -30,6 +30,12 @@ export default function Login() {
     }
   };
 
+  const handleGoogleLogin = () => {
+    // Redirect to backend Google OAuth route
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+    window.location.href = `${backendUrl}/api/auth/google`;
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.card}>
@@ -65,6 +71,17 @@ export default function Login() {
             Sign In
           </button>
         </form>
+
+        <div style={styles.divider}>
+          <span style={styles.dividerLine}></span>
+          <span style={styles.dividerText}>OR</span>
+          <span style={styles.dividerLine}></span>
+        </div>
+
+        <button onClick={handleGoogleLogin} style={styles.googleButton}>
+          <span style={styles.googleIcon}>🔐</span>
+          Continue with Google
+        </button>
 
         <p style={styles.footerText}>
           Don&apos;t have an account?{' '}
@@ -156,5 +173,39 @@ const styles = {
     color: '#d7747e',
     textDecoration: 'none',
     fontWeight: '500',
+  },
+  divider: {
+    display: 'flex',
+    alignItems: 'center',
+    margin: '20px 0',
+    gap: '12px',
+  },
+  dividerLine: {
+    flex: 1,
+    height: '1px',
+    background: '#ddd',
+  },
+  dividerText: {
+    color: '#888',
+    fontSize: '14px',
+  },
+  googleButton: {
+    width: '100%',
+    background: 'white',
+    color: '#333',
+    padding: '14px',
+    borderRadius: '8px',
+    border: '1px solid #ddd',
+    fontSize: '16px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
+    transition: 'background 0.2s',
+  },
+  googleIcon: {
+    fontSize: '20px',
   },
 };

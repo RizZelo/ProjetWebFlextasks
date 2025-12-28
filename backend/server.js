@@ -1,21 +1,34 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import connectDB from "./config/db.js";
+import authRoutes from "./routes/auth.js";
+import taskRoutes from "./routes/tasks.js";
+import messageRoutes from "./routes/messages.js";
+import ratingRoutes from "./routes/ratings.js";
 
 dotenv.config();
+
+// Connect to MongoDB
+connectDB();
 
 const app = express();
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:5173" // <-- This is where you paste it
+  origin: "http://localhost:5173" 
 }));
 app.use(express.json());
 
 // Routes
 app.get("/", (req, res) => {
-  res.json({ message: "Backend is working!" });
+  res.json({ message: "FlexTasks API is running!" });
 });
+
+app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/ratings", ratingRoutes);
 
 const PORT = process.env.PORT || 5000;
 

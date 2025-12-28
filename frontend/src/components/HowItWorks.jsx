@@ -1,8 +1,8 @@
 import styles from '../styles/HowItWorks.module.css';
 
 export default function HowItWorks(){
-    return(
-        <section className={styles.section}>
+  return(
+    <section id="how-it-works" className={styles.section}>
             <div className={styles.container}>
                 <h2 className={styles.title}>How It Works</h2>
                 <p className={styles.subtitle}>Simple steps to get started</p>

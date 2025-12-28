@@ -28,7 +28,11 @@ export default function Navbar(){
             </div>
             <ul style={styles.menu}>
                 <li><Link to="/" style={styles.menuLink}>Home</Link></li>
-                <li><a href="#how-it-works" style={styles.menuLink}>How It Works</a></li>
+                <li>
+                    <Link to={{ pathname: '/', hash: '#how-it-works' }} style={styles.menuLink}>
+                        How It Works
+                    </Link>
+                </li>
                 <li><a href="#about" style={styles.menuLink}>About</a></li>
                 <li><a href="#contact" style={styles.menuLink}>Contact</a></li>
             </ul>

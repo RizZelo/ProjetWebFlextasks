@@ -70,6 +70,8 @@ export default function StudentDashboard() {
     if (client) {
       setChatTask(task);
       setChatClient(client);
+    } else {
+      alert('Unable to load client information. Please try again.');
     }
   };
 

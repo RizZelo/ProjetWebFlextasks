@@ -67,7 +67,8 @@ export default function ClientDashboard() {
     const missingFields = Object.keys(requiredFields).filter(key => !requiredFields[key]);
     
     if (missingFields.length > 0) {
-      setError('Please fill in all required fields');
+      const fieldNames = missingFields.map(f => f.charAt(0).toUpperCase() + f.slice(1)).join(', ');
+      setError(`Please fill in the following required fields: ${fieldNames}`);
       return;
     }
 
@@ -124,6 +125,8 @@ export default function ClientDashboard() {
       if (student) {
         setChatTask(task);
         setChatStudent(student);
+      } else {
+        alert('Unable to load student information. Please try again.');
       }
     }
   };

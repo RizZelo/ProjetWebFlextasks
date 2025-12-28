@@ -84,7 +84,7 @@ export default function UserProfile({ userId, onClose }) {
 
         <div style={styles.profileSection}>
           <div style={styles.avatar}>
-            {user.name.charAt(0).toUpperCase()}
+            {user.name?.charAt(0)?.toUpperCase() || '?'}
           </div>
           <div style={styles.userInfo}>
             <h3 style={styles.userName}>{user.name}</h3>

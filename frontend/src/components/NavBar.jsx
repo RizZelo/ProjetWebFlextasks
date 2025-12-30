@@ -33,8 +33,16 @@ export default function Navbar(){
                         How It Works
                     </Link>
                 </li>
-                <li><a href="#about" style={styles.menuLink}>About</a></li>
-                <li><a href="#contact" style={styles.menuLink}>Contact</a></li>
+                <li>
+                    <Link to={{ pathname: '/', hash: '#about' }} style={styles.menuLink}>
+                        About
+                    </Link>
+                </li>
+                <li>
+                    <Link to={{ pathname: '/', hash: '#contact' }} style={styles.menuLink}>
+                        Contact
+                    </Link>
+                </li>
             </ul>
             <div style={styles.right}>
                 {isAuthenticated ? (

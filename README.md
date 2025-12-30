@@ -38,7 +38,7 @@ A modern web application connecting students with local job opportunities. Stude
 
 ### Prerequisites
 - Node.js (v14 or higher)
-- MongoDB (local or MongoDB Atlas)
+- MongoDB local 
 - Google Cloud Console account (for OAuth)
 
 ### Installation
@@ -62,13 +62,6 @@ A modern web application connecting students with local job opportunities. Stude
    npm install
    npm run dev
    ```
-
-4. **Configure Google OAuth** (See [SETUP_GUIDE.md](SETUP_GUIDE.md) for detailed instructions)
-   - Create Google Cloud project
-   - Enable Google+ API
-   - Create OAuth 2.0 credentials
-   - Add redirect URIs
-   - Update .env files
 
 ## 📖 Documentation
 

@@ -53,8 +53,6 @@ A modern web application connecting students with local job opportunities. Stude
    ```bash
    cd backend
    npm install
-   cp .env.example .env
-   # Edit .env with your configuration
    npm run dev
    ```
 
@@ -62,8 +60,6 @@ A modern web application connecting students with local job opportunities. Stude
    ```bash
    cd frontend
    npm install
-   cp .env.example .env
-   # Edit .env with your configuration
    npm run dev
    ```
 

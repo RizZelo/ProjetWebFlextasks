@@ -24,6 +24,7 @@ export default function StudentDashboard() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [appliedTasks, setAppliedTasks] = useState([]);
   const [myApplications, setMyApplications] = useState([]);
+  const [activeTab, setActiveTab] = useState('tasks'); // 'tasks' | 'applications'
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [chatTask, setChatTask] = useState(null);
   const [chatClient, setChatClient] = useState(null);
@@ -119,7 +120,7 @@ export default function StudentDashboard() {
     };
     
     fetchTasks();
-  }, [isStudent, navigate, user?.id]);
+  }, [isStudent, navigate, user?.id, user?.name]);
 
   const handleApply = async (taskId) => {
     try {
@@ -200,9 +201,15 @@ export default function StudentDashboard() {
     window.location.reload();
   };
 
-  const filteredTasks = selectedCategory === 'all' 
-    ? tasks 
-    : tasks.filter(t => t.category === selectedCategory);
+  const filteredTasks = tasks.filter(t => {
+    // Only show tasks that are still open and that the student
+    // has not already applied for; completed/assigned ones stay
+    // visible only under "My Applications".
+    if (t.status !== 'open') return false;
+    if (appliedTasks.includes(t._id)) return false;
+    if (selectedCategory !== 'all' && t.category !== selectedCategory) return false;
+    return true;
+  });
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -226,7 +233,13 @@ export default function StudentDashboard() {
     <div style={styles.container}>
       <nav style={styles.nav}>
         <div style={styles.navLeft}>
-          <span style={styles.logo}>🎓 FlexTasks</span>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            style={styles.logoButton}
+          >
+            <span style={styles.logo}>🎓 FlexTasks</span>
+          </button>
           <span style={styles.roleLabel}>Student Portal</span>
         </div>
         <div style={styles.navRight}>
@@ -239,13 +252,43 @@ export default function StudentDashboard() {
         <header style={styles.header}>
           <h1 style={styles.title}>Find Your Next Task</h1>
           <p style={styles.subtitle}>Browse available tasks in your area and start earning</p>
+          <div style={styles.tabs}>
+            <button
+              type="button"
+              onClick={() => setActiveTab('tasks')}
+              style={{
+                ...styles.tabButton,
+                ...(activeTab === 'tasks' ? styles.tabButtonActive : {}),
+              }}
+            >
+              Find Tasks
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('applications')}
+              style={{
+                ...styles.tabButton,
+                ...(activeTab === 'applications' ? styles.tabButtonActive : {}),
+              }}
+            >
+              My Applications
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedUserId(user?.id)}
+              style={styles.profileButton}
+            >
+              View My Profile
+            </button>
+          </div>
         </header>
 
         {/* My Applications Section */}
-        {myApplications.length > 0 && (
-          <section style={styles.section}>
-            <h2 style={styles.sectionTitle}>My Applications ({myApplications.length})</h2>
-            <div style={styles.applicationsGrid}>
+        {activeTab === 'applications' && (
+          myApplications.length > 0 ? (
+            <section style={styles.section}>
+              <h2 style={styles.sectionTitle}>My Applications ({myApplications.length})</h2>
+              <div style={styles.applicationsGrid}>
               {myApplications.map(app => {
                 const task = tasks.find(t => t._id === app.taskId);
                 if (!task) return null;
@@ -297,73 +340,83 @@ export default function StudentDashboard() {
                   </div>
                 );
               })}
-            </div>
-          </section>
-        )}
-
-        <div style={styles.categories}>
-          {TASK_CATEGORIES.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              style={{
-                ...styles.categoryBtn,
-                ...(selectedCategory === cat.id ? styles.categoryBtnActive : {}),
-              }}
-            >
-              <span>{cat.icon}</span>
-              <span>{cat.name}</span>
-            </button>
-          ))}
-        </div>
-
-        <div style={styles.tasksGrid}>
-          {filteredTasks.length === 0 ? (
-            <div style={styles.emptyState}>
-              <span style={styles.emptyIcon}>📭</span>
-              <h3 style={styles.emptyTitle}>No tasks available</h3>
-              <p style={styles.emptyText}>Check back later for new opportunities!</p>
-            </div>
-          ) : (
-            filteredTasks.map(task => (
-              <div key={task._id} style={styles.taskCard}>
-                <div style={styles.taskHeader}>
-                  <span style={styles.taskCategory}>
-                    {TASK_CATEGORIES.find(c => c.id === task.category)?.icon || '📋'}{' '}
-                    {TASK_CATEGORIES.find(c => c.id === task.category)?.name || task.category}
-                  </span>
-                  <span style={styles.taskPrice}>${task.budget}</span>
-                </div>
-                <h3 style={styles.taskTitle}>{task.title}</h3>
-                <p style={styles.taskDescription}>{task.description}</p>
-                <div style={styles.taskDetails}>
-                  <span>📍 {formatLocation(task.location)}</span>
-                  {task.estimatedDuration && <span>⏱️ {task.estimatedDuration}h</span>}
-                  <span>📅 {formatDate(task.scheduledDate)}</span>
-                  <span>⏰ {task.scheduledTime}</span>
-                </div>
-                <div style={styles.taskFooter}>
-                  <span 
-                    style={styles.clientName}
-                    onClick={() => setSelectedUserId(task.client?._id || task.client)}
-                  >
-                    Posted by {task.client?.name || 'Client'}
-                  </span>
-                  {appliedTasks.includes(task._id) ? (
-                    <span style={styles.appliedBadge}>✓ Applied</span>
-                  ) : (
-                    <button
-                      onClick={() => handleApply(task._id)}
-                      style={styles.applyBtn}
-                    >
-                      Apply Now
-                    </button>
-                  )}
-                </div>
               </div>
-            ))
-          )}
-        </div>
+            </section>
+          ) : (
+            <div style={styles.emptyState}>
+              <span style={styles.emptyIcon}>📝</span>
+              <h3 style={styles.emptyTitle}>You haven't applied to any tasks yet</h3>
+              <p style={styles.emptyText}>Switch to "Find Tasks" to browse available opportunities.</p>
+            </div>
+          )
+        )}
+        {activeTab === 'tasks' && (
+          <>
+            <div style={styles.categories}>
+              {TASK_CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  style={{
+                    ...styles.categoryBtn,
+                    ...(selectedCategory === cat.id ? styles.categoryBtnActive : {}),
+                  }}
+                >
+                  <span>{cat.icon}</span>
+                  <span>{cat.name}</span>
+                </button>
+              ))}
+            </div>
+
+            <div style={styles.tasksGrid}>
+              {filteredTasks.length === 0 ? (
+                <div style={styles.emptyState}>
+                  <span style={styles.emptyIcon}>📭</span>
+                  <h3 style={styles.emptyTitle}>No tasks available</h3>
+                  <p style={styles.emptyText}>Check back later for new opportunities!</p>
+                </div>
+              ) : (
+                filteredTasks.map(task => (
+                  <div key={task._id} style={styles.taskCard}>
+                    <div style={styles.taskHeader}>
+                      <span style={styles.taskCategory}>
+                        {TASK_CATEGORIES.find(c => c.id === task.category)?.icon || '📋'}{' '}
+                        {TASK_CATEGORIES.find(c => c.id === task.category)?.name || task.category}
+                      </span>
+                      <span style={styles.taskPrice}>${task.budget}</span>
+                    </div>
+                    <h3 style={styles.taskTitle}>{task.title}</h3>
+                    <p style={styles.taskDescription}>{task.description}</p>
+                    <div style={styles.taskDetails}>
+                      <span>📍 {formatLocation(task.location)}</span>
+                      {task.estimatedDuration && <span>⏱️ {task.estimatedDuration}h</span>}
+                      <span>📅 {formatDate(task.scheduledDate)}</span>
+                      <span>⏰ {task.scheduledTime}</span>
+                    </div>
+                    <div style={styles.taskFooter}>
+                      <span 
+                        style={styles.clientName}
+                        onClick={() => setSelectedUserId(task.client?._id || task.client)}
+                      >
+                        Posted by {task.client?.name || 'Client'}
+                      </span>
+                      {appliedTasks.includes(task._id) ? (
+                        <span style={styles.appliedBadge}>✓ Applied</span>
+                      ) : (
+                        <button
+                          onClick={() => handleApply(task._id)}
+                          style={styles.applyBtn}
+                        >
+                          Apply Now
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        )}
       </main>
 
       {/* User Profile Modal */}
@@ -425,6 +478,15 @@ const styles = {
     alignItems: 'center',
     gap: '16px',
   },
+  logoButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: 0,
+    border: 'none',
+    background: 'transparent',
+    cursor: 'pointer',
+  },
   logo: {
     fontSize: '24px',
     fontWeight: '700',
@@ -473,6 +535,35 @@ const styles = {
   subtitle: {
     fontSize: '18px',
     color: '#666',
+  },
+  tabs: {
+    marginTop: '24px',
+    display: 'flex',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: '12px',
+  },
+  tabButton: {
+    padding: '8px 18px',
+    borderRadius: '20px',
+    border: '1px solid #ddd',
+    background: 'white',
+    cursor: 'pointer',
+    fontSize: '14px',
+  },
+  tabButtonActive: {
+    background: '#d7747e',
+    color: 'white',
+    borderColor: '#d7747e',
+  },
+  profileButton: {
+    padding: '8px 18px',
+    borderRadius: '20px',
+    border: '1px solid #ddd',
+    background: 'white',
+    cursor: 'pointer',
+    fontSize: '14px',
+    color: '#333',
   },
   categories: {
     display: 'flex',

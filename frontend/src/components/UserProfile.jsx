@@ -59,6 +59,8 @@ export default function UserProfile({ userId, onClose }) {
   const ratings = user.ratings || [];
   const completedTasks = user.completedTasks || [];
 
+  const totalEarnings = completedTasks.reduce((sum, task) => sum + (task.budget || 0), 0);
+
   const calculateAverageRating = () => {
     if (ratings.length === 0) return 0;
     const sum = ratings.reduce((acc, r) => acc + (r.rating || 0), 0);
@@ -113,6 +115,13 @@ export default function UserProfile({ userId, onClose }) {
             <div style={styles.ratingNumber}>{calculateAverageRating()}</div>
             <div style={styles.stars}>{renderStars(parseFloat(calculateAverageRating()))}</div>
             <div style={styles.ratingCount}>{ratings.length} {ratings.length === 1 ? 'review' : 'reviews'}</div>
+          </div>
+
+          <div style={styles.earningsCard}>
+            <span style={styles.earningsLabel}>
+              {user.role === 'student' ? 'Total earned from FlexTasks' : 'Total spent on FlexTasks'}
+            </span>
+            <span style={styles.earningsValue}>${totalEarnings.toFixed(2)}</span>
           </div>
 
           {ratings.length > 0 && (
@@ -358,6 +367,26 @@ const styles = {
   ratingCount: {
     fontSize: '14px',
     color: '#666',
+  },
+  earningsCard: {
+    margin: '0 auto 24px',
+    padding: '14px 18px',
+    borderRadius: '12px',
+    background: '#f5f5ff',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    maxWidth: '360px',
+  },
+  earningsLabel: {
+    fontSize: '14px',
+    color: '#555',
+    marginRight: '12px',
+  },
+  earningsValue: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#2e7d32',
   },
   categoryRatings: {
     display: 'flex',

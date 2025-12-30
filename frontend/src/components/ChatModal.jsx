@@ -250,24 +250,25 @@ const styles = {
   },
   messageWrapper: {
     display: 'flex',
-    marginBottom: '4px',
+    width: '100%',
+    marginBottom: '8px',
   },
   messageBubble: {
     maxWidth: '70%',
-    padding: '12px 16px',
-    borderRadius: '12px',
+    padding: '10px 14px',
+    borderRadius: '18px',
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
   },
   currentUserBubble: {
-    background: '#d7747e',
-    color: 'white',
-  },
-  otherUserBubble: {
     background: 'white',
     color: '#333',
     border: '1px solid #ddd',
+  },
+  otherUserBubble: {
+    background: '#d7747e',
+    color: 'white',
   },
   messageContent: {
     fontSize: '14px',

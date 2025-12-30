@@ -86,7 +86,7 @@ export default function ClientDashboard() {
     } catch (error) {
       console.error('Error loading data:', error);
     }
-  }, [user?.id]);
+  }, [user]);
 
   useEffect(() => {
     if (!isClient) {
@@ -265,7 +265,13 @@ export default function ClientDashboard() {
     <div style={styles.container}>
       <nav style={styles.nav}>
         <div style={styles.navLeft}>
-          <span style={styles.logo}>👤 FlexTasks</span>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            style={styles.logoButton}
+          >
+            <span style={styles.logo}>👤 FlexTasks</span>
+          </button>
           <span style={styles.roleLabel}>Client Portal</span>
         </div>
         <div style={styles.navRight}>
@@ -281,9 +287,18 @@ export default function ClientDashboard() {
               <h1 style={styles.title}>Your Task Dashboard</h1>
               <p style={styles.subtitle}>Post tasks and find reliable students to help</p>
             </div>
-            <button onClick={() => setShowForm(true)} style={styles.postBtn}>
-              + Post New Task
-            </button>
+            <div style={styles.headerActions}>
+              <button onClick={() => setShowForm(true)} style={styles.postBtn}>
+                + Post New Task
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedUserId(user?.id)}
+                style={styles.viewProfileBtn}
+              >
+                View My Profile
+              </button>
+            </div>
           </div>
         </header>
 
@@ -646,6 +661,15 @@ const styles = {
     alignItems: 'center',
     gap: '16px',
   },
+  logoButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: 0,
+    border: 'none',
+    background: 'transparent',
+    cursor: 'pointer',
+  },
   logo: {
     fontSize: '24px',
     fontWeight: '700',
@@ -688,6 +712,12 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: '24px',
+  },
+  headerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
   },
   title: {
     fontSize: '36px',
@@ -700,6 +730,16 @@ const styles = {
     color: '#666',
   },
   postBtn: {
+    background: '#d7747e',
+    color: 'white',
+    padding: '14px 28px',
+    borderRadius: '8px',
+    border: 'none',
+    cursor: 'pointer',
+    fontWeight: '600',
+    fontSize: '16px',
+  },
+  viewProfileBtn: {
     background: '#d7747e',
     color: 'white',
     padding: '14px 28px',

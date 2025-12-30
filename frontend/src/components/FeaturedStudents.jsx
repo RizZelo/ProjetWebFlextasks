@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import UserProfile from './UserProfile';
 
 export default function FeaturedStudents() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -64,9 +66,13 @@ export default function FeaturedStudents() {
               {student.hourlyRate && (
                 <p style={styles.rate}>${student.hourlyRate}/hr</p>
               )}
-              <Link to={`/profile/${student._id}`} style={styles.viewProfile}>
+              <button
+                type="button"
+                onClick={() => setSelectedUserId(student._id)}
+                style={styles.viewProfileButton}
+              >
                 View Profile
-              </Link>
+              </button>
             </div>
           ))}
         </div>
@@ -77,6 +83,12 @@ export default function FeaturedStudents() {
           </Link>
         </div>
       </div>
+      {selectedUserId && (
+        <UserProfile
+          userId={selectedUserId}
+          onClose={() => setSelectedUserId(null)}
+        />
+      )}
     </section>
   );
 }
@@ -175,13 +187,14 @@ const styles = {
     color: '#d7747e',
     marginBottom: '16px',
   },
-  viewProfile: {
+  viewProfileButton: {
     display: 'inline-block',
     background: '#d7747e',
     color: 'white',
     padding: '8px 16px',
     borderRadius: '8px',
-    textDecoration: 'none',
+    border: 'none',
+    cursor: 'pointer',
     fontWeight: '500',
     fontSize: '14px',
   },

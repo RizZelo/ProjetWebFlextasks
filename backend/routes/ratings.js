@@ -8,7 +8,7 @@ const router = express.Router();
 // Create a rating
 router.post('/', protect, async (req, res) => {
   try {
-    const { taskId, ratedUser, rating, comment, punctuality, quality, communication } = req.body;
+    const { taskId, ratedUser, rating, comment, punctuality, professionalism, quality, communication } = req.body;
 
     // Verify task is completed
     const task = await Task.findById(taskId);
@@ -36,6 +36,7 @@ router.post('/', protect, async (req, res) => {
       rating,
       comment,
       punctuality,
+      professionalism,
       quality,
       communication
     });

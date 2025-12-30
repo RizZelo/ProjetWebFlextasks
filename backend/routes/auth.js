@@ -125,7 +125,7 @@ router.get('/profile/:id', async (req, res) => {
         status: 'completed'
       })
         .populate('client', 'name')
-        .select('title category completedDate')
+        .select('title category completedDate budget')
         .sort({ completedDate: -1 })
         .limit(10);
     } else if (user.role === 'client') {
@@ -134,7 +134,7 @@ router.get('/profile/:id', async (req, res) => {
         status: 'completed'
       })
         .populate('student', 'name')
-        .select('title category completedDate')
+        .select('title category completedDate budget')
         .sort({ completedDate: -1 })
         .limit(10);
     }
